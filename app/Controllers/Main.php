@@ -1,43 +1,37 @@
 <?php
-
+ 
 namespace App\Controllers;
 use App\Models\Auth;
-
-use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
-
 class Main extends BaseController
-{
+{  
     protected $request;
-    
-    public function __construct(){
+ 
+    public function __construct()
+    {
         $this->request = \Config\Services::request();
         $this->session = session();
-        $this->auth_model= new Auth();
-        $this->data = ['session' => $this-> seesion];
+        $this->auth_model = new Auth;
+        $this->data = ['session' => $this->session];
     }
-    
+ 
     public function index()
     {
         $this->data['page_title']="Home";
-        return view('pages/home',$this->data);
-
+        return view('pages/home', $this->data);
     }
-
+ 
     public function users(){
-        if ($this->session->Login_type !=1) {
+        if($this->session->login_type != 1){
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
-            
         }
         $this->data['page_title']="Users";
-        $this->data['page']= !empty($this->request->getVar('page'))? $this->request->getVar('page'):1;
-        $this->data['perPage'] = 10;
-        $this->data['total']=$this->auth_model->where("id != '{$this->session->login_id}'")->countAllResults();
-        $this->data['users']=$this->auth_model->where("id != '{$this->session->login_id}'")->paginate($this->data['perPage']);
-        $this->data['total_res'] = is_array($this->data['users'])? count($this->data['users']):0;
-        $this->data['pager']=$this->auth_model->pager;
-        return view('pages/users/list',$this->data);
-
+        $this->data['page'] =  !empty($this->request->getVar('page')) ? $this->request->getVar('page') : 1;
+        $this->data['perPage'] =  10;
+        $this->data['total'] =  $this->auth_model->where("id != '{$this->session->login_id}'")->countAllResults();
+        $this->data['users'] = $this->auth_model->where("id != '{$this->session->login_id}'")->paginate($this->data['perPage']);
+        $this->data['total_res'] = is_array($this->data['users'])? count($this->data['users']) : 0;
+        $this->data['pager'] = $this->auth_model->pager;
+        return view('pages/users/list', $this->data);
     }
     public function user_edit($id=''){
         if($this->session->login_type != 1){
@@ -71,21 +65,21 @@ class Main extends BaseController
         $this->data['user'] = $this->auth_model->where("id ='{$id}'")->first();
         return view('pages/users/edit', $this->data);
     }
-    public function user_delete($id = ''){
+   
+    public function user_delete($id=''){
         if($this->session->login_type != 1){
             throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
         }
-
-        if (empty($id)) {
-            $this->session->setFlashdata('Main_error',"user Deletion failed due to unknown ID....");
-            return redirect()->to('Main/users');
+        if(empty($id)){
+                $this->session->setFlashdata('main_error',"user Deletion failed due to unknown ID.");
+                return redirect()->to('Main/users');
         }
         $delete = $this->auth_model->where('id', $id)->delete();
-        if ($delete) {
-            $this->session->setFlashdata('Main_succes',"user has been delete successfully...");
+        if($delete){
+            $this->session->setFlashdata('main_success',"User has been deleted successfully.");
         }else{
-            $this->session->setFlashdata('Main_error',"user Deletion failed due to unknown ID");
+            $this->session->setFlashdata('main_error',"user Deletion failed due to unknown ID.");
         }
         return redirect()->to('Main/users');
     }
-}
+}      
